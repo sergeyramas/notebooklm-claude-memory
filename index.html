@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NotebookLM × Claude Code — твоя память без затрат</title>
+<meta name="description" content="Превратить бесплатный Google NotebookLM в research-память для Claude Code. Не жжёт токены LLM, не требует Pinecone и Supabase. Ставится за 10 минут." />
+<meta property="og:title" content="NotebookLM × Claude Code — твоя память без затрат" />
+<meta property="og:description" content="Бесплатная research-память для AI-агентов. 1M токенов контекста, source-grounded ответы, ноль затрат на векторные базы." />
+<meta property="og:type" content="website" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📚%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0a0b;
+    --bg-elev: #111114;
+    --border: #1f1f24;
+    --text: #ededed;
+    --text-dim: #9b9ba3;
+    --text-faint: #5a5a63;
+    --accent: #d4ff3c;
+    --accent-dim: #a3c52d;
+    --warn: #ff6b35;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-feature-settings: 'ss01', 'cv11';
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+  .container { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,10,11,0.75);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav .row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 0;
+  }
+  .logo { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+  .logo span { color: var(--accent); }
+  nav ul { display: flex; gap: 32px; list-style: none; }
+  nav ul a { color: var(--text-dim); text-decoration: none; font-size: 14px; transition: color .15s; }
+  nav ul a:hover { color: var(--text); }
+  nav .cta { font-size: 13px; padding: 8px 14px; border-radius: 6px; background: var(--accent); color: #000; text-decoration: none; font-weight: 600; }
+  @media (max-width: 720px) { nav ul { display: none; } }
+
+  /* HERO */
+  .hero { padding: 120px 0 80px; position: relative; overflow: hidden; }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(60% 80% at 50% 0%, rgba(212,255,60,0.08), transparent 70%);
+    pointer-events: none;
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg-elev); border: 1px solid var(--border);
+    padding: 6px 12px; border-radius: 999px;
+    font-size: 12px; color: var(--text-dim);
+    margin-bottom: 32px;
+  }
+  .badge .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+  h1 {
+    font-size: clamp(40px, 6vw, 76px);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    font-weight: 700;
+    margin-bottom: 28px;
+    max-width: 920px;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .subtitle {
+    font-size: clamp(17px, 1.6vw, 21px);
+    color: var(--text-dim);
+    max-width: 720px;
+    margin-bottom: 48px;
+    font-weight: 400;
+  }
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn {
+    padding: 14px 22px; border-radius: 8px;
+    font-size: 15px; font-weight: 600; text-decoration: none;
+    transition: transform .15s, background .15s;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: var(--accent-dim); }
+  .btn-ghost { color: var(--text); border: 1px solid var(--border); background: var(--bg-elev); }
+  .btn-ghost:hover { border-color: var(--text-dim); }
+
+  /* PROOF STRIP */
+  .proof {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+    border: 1px solid var(--border); border-radius: 12px;
+    margin-top: 80px; overflow: hidden;
+  }
+  .proof > div {
+    padding: 24px 28px;
+    border-right: 1px solid var(--border);
+  }
+  .proof > div:last-child { border-right: 0; }
+  .proof .num { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+  .proof .num span { color: var(--accent); }
+  .proof .lbl { font-size: 13px; color: var(--text-dim); }
+  @media (max-width: 720px) {
+    .proof { grid-template-columns: repeat(2, 1fr); }
+    .proof > div:nth-child(2) { border-right: 0; }
+    .proof > div:nth-child(1), .proof > div:nth-child(2) { border-bottom: 1px solid var(--border); }
+  }
+
+  /* SECTIONS */
+  section { padding: 100px 0; border-top: 1px solid var(--border); }
+  .eyebrow {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.12em;
+    color: var(--accent); text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  h2 {
+    font-size: clamp(32px, 4vw, 52px);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    font-weight: 700;
+    margin-bottom: 24px;
+    max-width: 800px;
+  }
+  .lead {
+    font-size: 18px; color: var(--text-dim);
+    max-width: 720px; margin-bottom: 64px;
+  }
+
+  /* PROBLEM */
+  .problem-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  }
+  .problem-card {
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 12px; padding: 32px;
+  }
+  .problem-card .icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: rgba(255,107,53,0.12); border: 1px solid rgba(255,107,53,0.25);
+    color: var(--warn); display: flex; align-items: center; justify-content: center;
+    font-size: 20px; margin-bottom: 20px;
+  }
+  .problem-card h3 { font-size: 22px; margin-bottom: 12px; letter-spacing: -0.01em; }
+  .problem-card p { color: var(--text-dim); font-size: 15px; }
+  @media (max-width: 720px) { .problem-grid { grid-template-columns: 1fr; } }
+
+  /* BENEFITS */
+  .benefits {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+    background: var(--border); border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden;
+  }
+  .benefit {
+    background: var(--bg); padding: 36px 32px;
+  }
+  .benefit .b-icon {
+    font-size: 28px; margin-bottom: 18px;
+  }
+  .benefit h3 {
+    font-size: 18px; font-weight: 600;
+    margin-bottom: 10px; letter-spacing: -0.01em;
+  }
+  .benefit h3 .tag {
+    font-size: 11px; padding: 2px 8px; border-radius: 999px;
+    background: rgba(212,255,60,0.12); color: var(--accent);
+    margin-left: 8px; font-weight: 500; letter-spacing: 0;
+    vertical-align: middle;
+  }
+  .benefit p { color: var(--text-dim); font-size: 14px; line-height: 1.6; }
+  @media (max-width: 880px) { .benefits { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .benefits { grid-template-columns: 1fr; } }
+
+  /* MEMORY MAP */
+  .memory-map {
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 16px; padding: 40px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; line-height: 1.85;
+    color: var(--text-dim);
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .memory-map .hl { color: var(--accent); font-weight: 500; }
+  .memory-map .new { color: var(--warn); font-weight: 600; }
+  .memory-map .label { color: var(--text); }
+
+  /* COMPARE */
+  .compare {
+    border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden;
+  }
+  .compare table { width: 100%; border-collapse: collapse; }
+  .compare th, .compare td {
+    padding: 16px 20px; text-align: left;
+    font-size: 14px; border-bottom: 1px solid var(--border);
+  }
+  .compare th {
+    background: var(--bg-elev);
+    font-weight: 600; font-size: 13px;
+    letter-spacing: 0.02em; color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  .compare tr:last-child td { border-bottom: 0; }
+  .compare td:first-child { color: var(--text-dim); }
+  .compare .y { color: var(--accent); font-weight: 600; }
+  .compare .n { color: var(--text-faint); }
+
+  /* USE CASES */
+  .cases {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
+  }
+  .case {
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 12px; padding: 32px;
+    transition: border-color .2s;
+  }
+  .case:hover { border-color: var(--text-faint); }
+  .case h3 { font-size: 19px; margin-bottom: 12px; letter-spacing: -0.01em; }
+  .case p { color: var(--text-dim); font-size: 14px; margin-bottom: 16px; }
+  .case .ex {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; color: var(--accent);
+    background: rgba(212,255,60,0.05); border: 1px solid rgba(212,255,60,0.15);
+    padding: 12px 14px; border-radius: 6px;
+    line-height: 1.6;
+  }
+  @media (max-width: 720px) { .cases { grid-template-columns: 1fr; } }
+
+  /* INSTALL */
+  .install-steps {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    margin-bottom: 32px;
+  }
+  .step {
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px;
+    position: relative;
+  }
+  .step .n {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .step h4 { font-size: 15px; margin-bottom: 6px; }
+  .step p { color: var(--text-dim); font-size: 13px; }
+  @media (max-width: 880px) { .install-steps { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .install-steps { grid-template-columns: 1fr; } }
+  .terminal {
+    background: #050506; border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; line-height: 1.85;
+    overflow-x: auto;
+  }
+  .terminal .c { color: var(--text-faint); }
+  .terminal .p { color: var(--accent); }
+  .terminal .cmd { color: var(--text); }
+
+  /* FAQ */
+  details {
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 24px; margin-bottom: 12px;
+    background: var(--bg-elev);
+    cursor: pointer;
+  }
+  details summary {
+    font-weight: 600; font-size: 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    list-style: none;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "+"; color: var(--accent); font-size: 22px; transition: transform .2s; }
+  details[open] summary::after { transform: rotate(45deg); }
+  details p { margin-top: 14px; color: var(--text-dim); font-size: 15px; line-height: 1.65; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 60px 0 40px;
+    color: var(--text-faint); font-size: 13px;
+  }
+  footer .row {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 24px;
+  }
+  footer a { color: var(--text-dim); text-decoration: none; margin-left: 24px; }
+  footer a:hover { color: var(--text); }
+
+  /* CTA */
+  .final-cta {
+    text-align: center; padding: 100px 24px;
+    border-top: 1px solid var(--border);
+    background: radial-gradient(50% 100% at 50% 50%, rgba(212,255,60,0.08), transparent);
+  }
+  .final-cta h2 { margin: 0 auto 24px; }
+  .final-cta p { color: var(--text-dim); max-width: 540px; margin: 0 auto 36px; font-size: 17px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container row">
+    <div class="logo">📚 notebooklm <span>×</span> claude</div>
+    <ul>
+      <li><a href="#problem">Проблема</a></li>
+      <li><a href="#benefits">Преимущества</a></li>
+      <li><a href="#memory">Память</a></li>
+      <li><a href="#install">Установка</a></li>
+    </ul>
+    <a class="cta" href="#install">Установить</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="badge"><span class="dot"></span> Бесплатная research-память для AI-агентов</div>
+    <h1>Превратите Google&nbsp;NotebookLM в&nbsp;<em>память Claude&nbsp;Code</em>. Без вектор-баз. Без затрат на токены.</h1>
+    <p class="subtitle">
+      NotebookLM хранит ваши источники бесплатно — 1M токенов контекста, до 300 документов на ноутбук. Claude Code теперь умеет с ним разговаривать программно. Никакого Pinecone, никакого Supabase, никаких лишних API-вызовов.
+    </p>
+    <div class="hero-actions">
+      <a href="#install" class="btn btn-primary">Установить за 10 минут →</a>
+      <a href="https://github.com/PleasePrompto/notebooklm-skill" target="_blank" class="btn btn-ghost">GitHub</a>
+    </div>
+
+    <div class="proof">
+      <div>
+        <div class="num"><span>$0</span></div>
+        <div class="lbl">Стоимость хранения research</div>
+      </div>
+      <div>
+        <div class="num"><span>1M</span></div>
+        <div class="lbl">Токенов на один ноутбук</div>
+      </div>
+      <div>
+        <div class="num"><span>0</span></div>
+        <div class="lbl">Вектор-баз / RAG-серверов</div>
+      </div>
+      <div>
+        <div class="num">~<span>10</span><span style="font-size:.6em">мин</span></div>
+        <div class="lbl">Полная установка</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="problem">
+  <div class="container">
+    <div class="eyebrow">Проблема</div>
+    <h2>NotebookLM — лучший в мире &laquo;библиотекарь&raquo;.<br/>Но у него две дыры.</h2>
+    <p class="lead">
+      Google NotebookLM ест PDF, видео, аудио, картинки. Бесплатно. Делает подкасты, инфографику, mind-maps. Но в стандартном виде — это закрытый веб-инструмент. Ваши агенты к нему не имеют доступа.
+    </p>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="icon">🔒</div>
+        <h3>Знание заперто в Google</h3>
+        <p>Нет публичного API. Нет экспорта. Нет cross-notebook поиска. Данные входят, но не выходят. Ни один ваш AI-агент не может задать вопрос вашему ноутбуку.</p>
+      </div>
+      <div class="problem-card">
+        <div class="icon">🧮</div>
+        <h3>Только текст, никакой математики</h3>
+        <p>NotebookLM предсказывает, не считает. Никаких SQL, формул, агрегаций, ratio. &laquo;Какой тренд продаж за 5 лет?&raquo; — отвечает текстом, не цифрами.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="benefits">
+  <div class="container">
+    <div class="eyebrow">Решение и преимущества</div>
+    <h2>Skill для Claude Code снимает обе дыры. И вот что это даёт.</h2>
+    <p class="lead">
+      Skill — это ~150KB Python-скриптов, которые управляют NotebookLM через headless-браузер. Cookies-auth раз в полгода. Дальше Claude Code ходит в ваши ноутбуки сам и приносит ответы с цитатами на источники.
+    </p>
+
+    <div class="benefits">
+      <div class="benefit">
+        <div class="b-icon">💰</div>
+        <h3>Бесплатно <span class="tag">главное</span></h3>
+        <p>NotebookLM от Google — $0. Skill — open-source MIT. Никаких подписок на Pinecone (от $70/мес), Supabase Pro, или платных RAG-сервисов.</p>
+      </div>
+      <div class="benefit">
+        <div class="b-icon">⚡</div>
+        <h3>Не жжёт токены Claude</h3>
+        <p>Гигантская research-база живёт в NotebookLM, не в контексте Claude. Платите токенами только за финальный ответ, не за загрузку 100 PDF в каждом запросе.</p>
+      </div>
+      <div class="benefit">
+        <div class="b-icon">🧠</div>
+        <h3>1M токенов на ноутбук</h3>
+        <p>В одном ноутбуке помещается ~300 документов или часов аудио/видео. Это в 5 раз больше, чем максимальный контекст Claude.</p>
+      </div>
+      <div class="benefit">
+        <div class="b-icon">📎</div>
+        <h3>Source-grounded ответы</h3>
+        <p>Каждый факт — с цитатой на конкретный документ-источник. NotebookLM построен на Gemini, который специально обучен <em>не</em> галлюцинировать поверх ваших данных.</p>
+      </div>
+      <div class="benefit">
+        <div class="b-icon">🔄</div>
+        <h3>Cross-notebook синтез</h3>
+        <p>Сам NotebookLM не умеет искать между ноутбуками. Skill+Claude умеют — задаёте один вопрос всем 16 ноутбукам и получаете сравнительный анализ.</p>
+      </div>
+      <div class="benefit">
+        <div class="b-icon">🎬</div>
+        <h3>Ест видео и аудио</h3>
+        <p>YouTube, mp4, podcasts — всё индексируется. Claude получает доступ к мультимедиа-research без отдельного Whisper или транскрибаторов.</p>
+      </div>
+      <div class="benefit">
+        <div class="b-icon">📤</div>
+        <h3>Полный экспорт на диск</h3>
+        <p>Одной командой выкачиваете все транскрипты в файлы. Знание становится вашим — можно бэкапить, отдавать другим LLM, не зависеть от Google.</p>
+      </div>
+      <div class="benefit">
+        <div class="b-icon">🤖</div>
+        <h3>Любой агент, любой skill</h3>
+        <p>Установлен — сразу доступен всем вашим Claude-skill'ам. eBay-листинги, code-review, документация — все могут спросить research перед ответом.</p>
+      </div>
+      <div class="benefit">
+        <div class="b-icon">🚀</div>
+        <h3>10-минутная установка</h3>
+        <p>git clone в ~/.claude/skills, один Google-логин в браузере, и готово. Никаких Docker, k8s, выделенных серверов.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="memory">
+  <div class="container">
+    <div class="eyebrow">Архитектура памяти</div>
+    <h2>Пять слоёв вашей памяти &mdash; и куда встаёт NotebookLM</h2>
+    <p class="lead">
+      У зрелого пользователя Claude Code память — не одна папка, а слоёная архитектура. NotebookLM становится 5-м слоем: <strong>raw research</strong>, доступный по запросу.
+    </p>
+    <div class="memory-map"><span class="label">┌────────────────────────────────────────────────────────────┐</span>
+<span class="label">│                       ВЫ ПИШЕТЕ В CLAUDE                    │</span>
+<span class="label">└──────────────────────────┬─────────────────────────────────┘</span>
+                           │
+        <span class="hl">┌──────────────────┴──────────────────┐</span>
+        <span class="hl">│   CLAUDE CODE — читает все 5 слоёв  │</span>
+        <span class="hl">└──────────────────┬──────────────────┘</span>
+                           │
+   ┌───────────────────────┼───────────────────────┐
+   ▼                       ▼                       ▼
+<span class="label">┌──────────┐         ┌─────────────┐         ┌──────────────┐</span>
+<span class="label">│</span> 1. AUTO- <span class="label">│</span>         <span class="label">│</span> 2. WIKI     <span class="label">│</span>         <span class="label">│</span> 3. DAILY     <span class="label">│</span>
+<span class="label">│</span>  MEMORY  <span class="label">│</span>         <span class="label">│</span>   VAULT     <span class="label">│</span>         <span class="label">│</span>   LOGS       <span class="label">│</span>
+<span class="label">│</span>          <span class="label">│</span>         <span class="label">│</span> (Obsidian)  <span class="label">│</span>         <span class="label">│</span> (compiler)   <span class="label">│</span>
+<span class="label">└──────────┘</span>         <span class="label">└──────┬──────┘</span>         <span class="label">└──────────────┘</span>
+                           │
+                           ▼
+                    <span class="label">┌─────────────┐</span>
+                    <span class="label">│</span> 4. SKILLS   <span class="label">│</span>
+                    <span class="label">│</span> (поведения) <span class="label">│</span>
+                    <span class="label">└──────┬──────┘</span>
+                           │ skill notebooklm
+                           ▼
+                    <span class="new">┌─────────────┐</span>
+                    <span class="new">│</span> 5. NOTEBOOK <span class="new">│</span>  <span class="new">⭐ NEW</span>
+                    <span class="new">│</span>     LM      <span class="new">│</span>
+                    <span class="new">│</span>             <span class="new">│</span>
+                    <span class="new">│</span> raw research<span class="new">│</span>
+                    <span class="new">│</span> source-     <span class="new">│</span>
+                    <span class="new">│</span> grounded Q&A<span class="new">│</span>
+                    <span class="new">└─────────────┘</span></div>
+
+    <div style="height: 60px"></div>
+
+    <h3 style="font-size: 24px; margin-bottom: 24px; letter-spacing: -0.01em;">Что хранит каждый слой</h3>
+    <div class="compare">
+      <table>
+        <thead>
+          <tr><th>Слой</th><th>Что внутри</th><th>Когда работает</th><th>Цена</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1. Auto-memory</td><td>Факты о пользователе, инфра, активные проекты</td><td>Каждый запуск (auto)</td><td class="y">$0</td></tr>
+          <tr><td>2. Wiki vault</td><td>Distilled знания, entities, services, проекты</td><td>По запросу через wiki-query</td><td class="y">$0</td></tr>
+          <tr><td>3. Daily logs</td><td>Хроника по дням, индекс прошлых сессий</td><td>По упоминанию прошлого</td><td class="y">$0</td></tr>
+          <tr><td>4. Skills</td><td>Программы поведения (как делать X)</td><td>Триггеры в запросе</td><td class="y">$0</td></tr>
+          <tr><td>5. NotebookLM ⭐</td><td>Raw источники: PDF, видео, статьи</td><td>Когда нужна цитата из первоисточника</td><td class="y">$0</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="cases">
+  <div class="container">
+    <div class="eyebrow">Применение</div>
+    <h2>Что появляется нового</h2>
+    <p class="lead">
+      Skill превращает каждый ноутбук в API. И открывает классы задач, которые раньше требовали дорогих RAG-стэков.
+    </p>
+    <div class="cases">
+      <div class="case">
+        <h3>1. Дистилляция research → vault</h3>
+        <p>Прогнать 16 ноутбуков, извлечь ключевое, переработать в wiki-страницы. Знание перестанет жить в Google и станет под вашим контролем.</p>
+        <div class="ex">→ "Дистиллируй ноутбук X в wiki/projects/seo/spec.md"</div>
+      </div>
+      <div class="case">
+        <h3>2. Cross-notebook синтез</h3>
+        <p>Сам NotebookLM не умеет искать между ноутбуками. Skill умеет. Сравнить, что пишут разные источники, найти противоречия.</p>
+        <div class="ex">→ "Сравни юр-риски в 3 моих ноутбуках"</div>
+      </div>
+      <div class="case">
+        <h3>3. Bulk-ingest источников</h3>
+        <p>Создать ноутбук и одной командой залить 30 листингов конкурентов + 5 видео + FAQ. Без кликания. 5 минут вместо часа.</p>
+        <div class="ex">→ "Создай ноутбук X, залей эти 30 ссылок"</div>
+      </div>
+      <div class="case">
+        <h3>4. Live research для других skill'ов</h3>
+        <p>Любой ваш skill теперь может сходить в NotebookLM до ответа. Code-review проверяет, что говорят источники. Listing-генератор копирует тон конкурентов.</p>
+        <div class="ex">→ Skill X дёргает skill notebooklm в фоне</div>
+      </div>
+      <div class="case">
+        <h3>5. Локальные транскрипты</h3>
+        <p>Выкачать содержимое любого ноутбука в файлы. Можно искать grep'ом, отдавать другим LLM, бэкапить, дистиллировать пакетно.</p>
+        <div class="ex">→ "Скачай все транскрипты из ноутбука X в папку Y"</div>
+      </div>
+      <div class="case">
+        <h3>6. Подготовка к разговору с клиентом</h3>
+        <p>За 30 секунд получить 3 ключевых факта с цитатами на источники. Идеально для звонка через 2 минуты.</p>
+        <div class="ex">→ "Дай мне 3 главных факта про тему X с цитатами"</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="container">
+    <div class="eyebrow">Установка</div>
+    <h2>10 минут от нуля до первого запроса</h2>
+    <p class="lead">
+      Один git clone, один Google-логин в браузере, рестарт Claude Code. Всё.
+    </p>
+
+    <div class="install-steps">
+      <div class="step">
+        <div class="n">01</div>
+        <h4>Клонировать skill</h4>
+        <p>Open-source MIT, форк PleasePrompto. Ставится в ~/.claude/skills/</p>
+      </div>
+      <div class="step">
+        <div class="n">02</div>
+        <h4>Bootstrap venv</h4>
+        <p>Скрипт сам создаёт venv, ставит patchright и Chromium</p>
+      </div>
+      <div class="step">
+        <div class="n">03</div>
+        <h4>Один Google-логин</h4>
+        <p>Видимый Chrome → войти в свой Google → cookies сохраняются локально</p>
+      </div>
+      <div class="step">
+        <div class="n">04</div>
+        <h4>Рестарт Claude</h4>
+        <p>Auto-discovery подхватит skill. Дальше просто говорите &laquo;спроси мой ноутбук X&raquo;</p>
+      </div>
+    </div>
+
+    <div class="terminal"><span class="c"># 1. Клонируем</span>
+<span class="p">$</span> <span class="cmd">git clone https://github.com/PleasePrompto/notebooklm-skill ~/.claude/skills/notebooklm</span>
+
+<span class="c"># 2. Bootstrap (venv + Chromium ~150MB)</span>
+<span class="p">$</span> <span class="cmd">cd ~/.claude/skills/notebooklm</span>
+<span class="p">$</span> <span class="cmd">python3 scripts/run.py auth_manager.py status</span>
+
+<span class="c"># 3. Login (откроется видимый Chrome)</span>
+<span class="p">$</span> <span class="cmd">python3 scripts/run.py auth_manager.py setup</span>
+
+<span class="c"># 4. Проверка</span>
+<span class="p">$</span> <span class="cmd">python3 scripts/run.py notebook_manager.py list</span>
+
+<span class="c"># Готово. Теперь в Claude Code:</span>
+<span class="c"># > "спроси у моего notebookLM (URL): что за тема?"</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="eyebrow">FAQ</div>
+    <h2>Частые вопросы</h2>
+    <div style="margin-top: 40px;">
+      <details>
+        <summary>Это правда бесплатно? Где подвох?</summary>
+        <p>Подвоха нет. Google NotebookLM бесплатен для всех с Google-аккаунтом — это часть инвестиций Google в Gemini-экосистему. Skill — open-source MIT. Единственная &laquo;стоимость&raquo; — токены Claude Code на финальные ответы (которые вы и так платите).</p>
+      </details>
+      <details>
+        <summary>Зачем тогда вообще существует Pinecone?</summary>
+        <p>Pinecone нужен, когда вы строите <em>публичный</em> сервис: AI-консультант на сайте клиента, чат-бот для сотен пользователей, knowledge-API. Там Pinecone отвечает за shareable серверный RAG. Для <em>личной памяти</em> агента Pinecone — overkill. Используйте его, только если делаете продукт под клиента.</p>
+      </details>
+      <details>
+        <summary>Не жрёт ли это токены при каждом запросе?</summary>
+        <p>Нет. Skill отправляет в NotebookLM ваш вопрос, NotebookLM сам ищет по своим 1M-токенам контекста (это его токены, не ваши). Вам возвращается только короткий ответ + цитаты. Claude получает на вход ~1-2KB, не 1MB.</p>
+      </details>
+      <details>
+        <summary>Что если Google поменяет UI и skill сломается?</summary>
+        <p>Это риск всех RPA-решений. Upstream-репо обычно патчат за 1-3 дня. Есть запасные skill-варианты: teng-lin/notebooklm-py, jacob-bd/notebooklm-cli — переключение в одну команду. И lfnovo/open-notebook — полная self-hosted замена NotebookLM, если хотите контроля.</p>
+      </details>
+      <details>
+        <summary>Можно использовать с Codex / Cursor / Gemini CLI?</summary>
+        <p>Skill написан под Claude Code, но это просто Python + markdown-инструкции. Адаптация под другие агенты — переписать SKILL.md под их формат + дёргать те же скрипты. Альтернативно — варианты teng-lin/notebooklm-py и jacob-bd/notebooklm-mcp-cli работают через MCP, который понимают многие агенты.</p>
+      </details>
+      <details>
+        <summary>Безопасно ли это? Cookies же хранятся локально.</summary>
+        <p>Cookies лежат в ~/.claude/skills/notebooklm/data/browser_state/state.json и доступны только владельцу учётки на Mac. Не передаются никуда. Skill не отправляет ничего никуда, кроме самого notebooklm.google.com. Код — 9 файлов Python, можно прочитать за 30 минут.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<div class="final-cta">
+  <h2>Дайте вашему агенту память.<br/>Без вектор-баз. Без серверов. Без затрат.</h2>
+  <p>Самый недооценённый upgrade Claude Code в 2026 году. 10 минут установки — и пять лет research-материалов превращаются в живую базу знаний для ваших агентов.</p>
+  <a href="#install" class="btn btn-primary">Установить →</a>
+</div>
+
+<footer>
+  <div class="container row">
+    <div>© 2026 sergeyramas. Открытый источник: skill PleasePrompto/notebooklm-skill (MIT).</div>
+    <div>
+      <a href="https://github.com/PleasePrompto/notebooklm-skill" target="_blank">Skill</a>
+      <a href="https://notebooklm.google.com" target="_blank">NotebookLM</a>
+      <a href="https://youtu.be/PkOlfB3RY5Q" target="_blank">Видео-источник</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
