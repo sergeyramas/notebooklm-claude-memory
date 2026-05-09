@@ -55,7 +55,109 @@
   nav ul a { color: var(--text-dim); text-decoration: none; font-size: 14px; transition: color .15s; }
   nav ul a:hover { color: var(--text); }
   nav .cta { font-size: 13px; padding: 8px 14px; border-radius: 6px; background: var(--accent); color: #000; text-decoration: none; font-weight: 600; }
-  @media (max-width: 720px) { nav ul { display: none; } }
+  .hub-link {
+    font-size: 13px; padding: 7px 12px; border-radius: 6px;
+    color: var(--text-dim); text-decoration: none;
+    border: 1px solid var(--border); background: var(--bg-elev);
+    transition: all .15s; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .hub-link:hover { color: var(--text); border-color: var(--text-faint); }
+  .hub-arrow { color: var(--accent); font-weight: 600; transition: transform .15s; }
+  .hub-link:hover .hub-arrow { transform: translateX(-2px); }
+  @media (max-width: 720px) {
+    nav ul { display: none; }
+    .hub-link { display: none; }
+  }
+
+  /* MEMORY LAYERS — detailed cards */
+  .layers { display: flex; flex-direction: column; gap: 0; margin-top: 56px; }
+  .layer {
+    display: grid;
+    grid-template-columns: 110px 1fr 240px;
+    gap: 32px;
+    padding: 36px 0;
+    border-top: 1px solid var(--border);
+    align-items: start;
+  }
+  .layer:last-child { border-bottom: 1px solid var(--border); }
+  .layer-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text-faint);
+    letter-spacing: 0.05em;
+    padding-top: 4px;
+  }
+  .layer-num .big {
+    display: block;
+    font-size: 56px;
+    font-weight: 200;
+    color: var(--text);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    margin-bottom: 6px;
+  }
+  .layer-num.new .big { color: var(--accent); }
+  .layer-body h3 {
+    font-size: 22px; letter-spacing: -0.015em;
+    margin-bottom: 8px; font-weight: 600;
+  }
+  .layer-body h3 .badge-new {
+    display: inline-block;
+    font-size: 10px; font-weight: 600;
+    padding: 3px 8px; border-radius: 999px;
+    background: var(--accent); color: #000;
+    vertical-align: middle; margin-left: 10px;
+    letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .layer-body .role {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.08em;
+    color: var(--text-faint); text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .layer-body p { color: var(--text-dim); font-size: 15px; line-height: 1.65; margin-bottom: 14px; }
+  .layer-body .tech {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; color: var(--text-faint);
+    background: var(--bg-elev); border: 1px solid var(--border);
+    padding: 10px 14px; border-radius: 6px;
+    margin-top: 10px;
+  }
+  .layer-body .tech b { color: var(--text-dim); font-weight: 500; }
+  .layer-install {
+    display: flex; flex-direction: column; gap: 8px;
+    padding-top: 4px;
+  }
+  .layer-install a {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 8px; text-decoration: none;
+    color: var(--text); font-size: 13px;
+    transition: all .15s;
+  }
+  .layer-install a:hover {
+    border-color: var(--accent);
+    background: rgba(212,255,60,0.05);
+  }
+  .layer-install a .arrow { color: var(--accent); transition: transform .15s; }
+  .layer-install a:hover .arrow { transform: translate(2px, -2px); }
+  .layer-install .label {
+    font-size: 11px; color: var(--text-faint);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 4px 0 4px 4px;
+  }
+  .layer-install .builtin {
+    padding: 12px 16px; background: rgba(255,255,255,0.02);
+    border: 1px dashed var(--border); border-radius: 8px;
+    color: var(--text-faint); font-size: 13px;
+    text-align: center;
+  }
+  @media (max-width: 880px) {
+    .layer { grid-template-columns: 80px 1fr; gap: 20px; }
+    .layer-install { grid-column: 2; }
+    .layer-num .big { font-size: 40px; }
+  }
 
   /* HERO */
   .hero { padding: 120px 0 80px; position: relative; overflow: hidden; }
@@ -314,14 +416,19 @@
 
 <nav>
   <div class="container row">
-    <div class="logo">📚 notebooklm <span>×</span> claude</div>
+    <a href="https://ramas-two.vercel.app" class="logo" style="text-decoration:none; color:inherit;">📚 notebooklm <span>×</span> claude</a>
     <ul>
       <li><a href="#problem">Проблема</a></li>
       <li><a href="#benefits">Преимущества</a></li>
       <li><a href="#memory">Память</a></li>
       <li><a href="#install">Установка</a></li>
     </ul>
-    <a class="cta" href="#install">Установить</a>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <a href="https://ramas-two.vercel.app" class="hub-link" title="Все проекты Сергея Рамаса">
+        <span class="hub-arrow">←</span> ramas hub
+      </a>
+      <a class="cta" href="#install">Установить</a>
+    </div>
   </div>
 </nav>
 
@@ -441,58 +548,207 @@
 <section id="memory">
   <div class="container">
     <div class="eyebrow">Архитектура памяти</div>
-    <h2>Пять слоёв вашей памяти &mdash; и куда встаёт NotebookLM</h2>
+    <h2>Шесть слоёв памяти Claude&nbsp;Code &mdash; и&nbsp;что ставится отдельно</h2>
     <p class="lead">
-      У зрелого пользователя Claude Code память — не одна папка, а слоёная архитектура. NotebookLM становится 5-м слоем: <strong>raw research</strong>, доступный по запросу.
+      У зрелого пользователя Claude Code память — не одна папка, а слоёная архитектура. Каждый слой решает свою задачу: одни встроены, другие ставятся как open-source пакеты с моего хаба. NotebookLM — последний слой, который закрывает дыру в research.
     </p>
+
     <div class="memory-map"><span class="label">┌────────────────────────────────────────────────────────────┐</span>
 <span class="label">│                       ВЫ ПИШЕТЕ В CLAUDE                    │</span>
 <span class="label">└──────────────────────────┬─────────────────────────────────┘</span>
                            │
         <span class="hl">┌──────────────────┴──────────────────┐</span>
-        <span class="hl">│   CLAUDE CODE — читает все 5 слоёв  │</span>
+        <span class="hl">│   CLAUDE CODE — читает все 6 слоёв  │</span>
         <span class="hl">└──────────────────┬──────────────────┘</span>
                            │
    ┌───────────────────────┼───────────────────────┐
    ▼                       ▼                       ▼
 <span class="label">┌──────────┐         ┌─────────────┐         ┌──────────────┐</span>
-<span class="label">│</span> 1. AUTO- <span class="label">│</span>         <span class="label">│</span> 2. WIKI     <span class="label">│</span>         <span class="label">│</span> 3. DAILY     <span class="label">│</span>
-<span class="label">│</span>  MEMORY  <span class="label">│</span>         <span class="label">│</span>   VAULT     <span class="label">│</span>         <span class="label">│</span>   LOGS       <span class="label">│</span>
-<span class="label">│</span>          <span class="label">│</span>         <span class="label">│</span> (Obsidian)  <span class="label">│</span>         <span class="label">│</span> (compiler)   <span class="label">│</span>
-<span class="label">└──────────┘</span>         <span class="label">└──────┬──────┘</span>         <span class="label">└──────────────┘</span>
-                           │
-                           ▼
-                    <span class="label">┌─────────────┐</span>
-                    <span class="label">│</span> 4. SKILLS   <span class="label">│</span>
-                    <span class="label">│</span> (поведения) <span class="label">│</span>
-                    <span class="label">└──────┬──────┘</span>
-                           │ skill notebooklm
-                           ▼
-                    <span class="new">┌─────────────┐</span>
-                    <span class="new">│</span> 5. NOTEBOOK <span class="new">│</span>  <span class="new">⭐ NEW</span>
-                    <span class="new">│</span>     LM      <span class="new">│</span>
-                    <span class="new">│</span>             <span class="new">│</span>
-                    <span class="new">│</span> raw research<span class="new">│</span>
-                    <span class="new">│</span> source-     <span class="new">│</span>
-                    <span class="new">│</span> grounded Q&A<span class="new">│</span>
-                    <span class="new">└─────────────┘</span></div>
+<span class="label">│</span> 1. AUTO- <span class="label">│</span>         <span class="label">│</span> 2. PER-     <span class="label">│</span>         <span class="label">│</span> 3. WIKI      <span class="label">│</span>
+<span class="label">│</span>  MEMORY  <span class="label">│</span>         <span class="label">│</span>   PROJECT   <span class="label">│</span>         <span class="label">│</span>   VAULT      <span class="label">│</span>
+<span class="label">│</span> (built-in)<span class="label">│</span>         <span class="label">│</span>   (tree)    <span class="label">│</span>         <span class="label">│</span> (Obsidian)   <span class="label">│</span>
+<span class="label">└──────────┘</span>         <span class="label">└─────────────┘</span>         <span class="label">└──────┬───────┘</span>
+                                                  │
+                  ┌───────────────────────────────┤
+                  ▼                               ▼
+           <span class="label">┌──────────────┐</span>            <span class="label">┌─────────────┐</span>
+           <span class="label">│</span> 4. DAILY     <span class="label">│</span>            <span class="label">│</span> 5. SKILLS   <span class="label">│</span>
+           <span class="label">│</span>   LOGS       <span class="label">│</span>            <span class="label">│</span> (поведения) <span class="label">│</span>
+           <span class="label">│</span> (compiler)   <span class="label">│</span>            <span class="label">└──────┬──────┘</span>
+           <span class="label">└──────────────┘</span>                   │ skill notebooklm
+                                              ▼
+                                       <span class="new">┌─────────────┐</span>
+                                       <span class="new">│</span> 6. NOTEBOOK <span class="new">│</span>  <span class="new">⭐ NEW</span>
+                                       <span class="new">│</span>     LM      <span class="new">│</span>
+                                       <span class="new">│</span> raw research<span class="new">│</span>
+                                       <span class="new">└─────────────┘</span></div>
 
-    <div style="height: 60px"></div>
+    <p style="margin-top: 28px; color: var(--text-faint); font-size: 14px; font-style: italic;">
+      Все 6 слоёв работают одновременно. Claude Code на каждый запрос проверяет каждый слой и вытаскивает то, что релевантно. Где хранить — текущие факты, проектное знание, distilled wiki или raw research — определяется природой данных, а не вкусом.
+    </p>
 
-    <h3 style="font-size: 24px; margin-bottom: 24px; letter-spacing: -0.01em;">Что хранит каждый слой</h3>
-    <div class="compare">
-      <table>
-        <thead>
-          <tr><th>Слой</th><th>Что внутри</th><th>Когда работает</th><th>Цена</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>1. Auto-memory</td><td>Факты о пользователе, инфра, активные проекты</td><td>Каждый запуск (auto)</td><td class="y">$0</td></tr>
-          <tr><td>2. Wiki vault</td><td>Distilled знания, entities, services, проекты</td><td>По запросу через wiki-query</td><td class="y">$0</td></tr>
-          <tr><td>3. Daily logs</td><td>Хроника по дням, индекс прошлых сессий</td><td>По упоминанию прошлого</td><td class="y">$0</td></tr>
-          <tr><td>4. Skills</td><td>Программы поведения (как делать X)</td><td>Триггеры в запросе</td><td class="y">$0</td></tr>
-          <tr><td>5. NotebookLM ⭐</td><td>Raw источники: PDF, видео, статьи</td><td>Когда нужна цитата из первоисточника</td><td class="y">$0</td></tr>
-        </tbody>
-      </table>
+    <div class="layers">
+
+      <!-- LAYER 1 -->
+      <div class="layer">
+        <div class="layer-num"><span class="big">01</span>BUILT-IN</div>
+        <div class="layer-body">
+          <h3>Auto-memory</h3>
+          <div class="role">// Факты о пользователе и инфраструктуре</div>
+          <p>
+            Anthropic-built система. Хранит короткие записи: кто пользователь, что у него за VPS, какие проекты горячие, какие предпочтения. Содержимое <strong>автоматически инжектится в системный промпт</strong> при каждом запуске Claude.
+          </p>
+          <p>
+            Записи появляются сами — Claude видит важный факт в разговоре и предлагает запомнить. Хранятся в <code>~/.claude/projects/&lt;slug&gt;/memory/MEMORY.md</code>. Приоритет в случае конфликта — <strong>выше wiki</strong>.
+          </p>
+          <div class="tech"><b>Когда работает:</b> каждый запуск (автоматически) · <b>Объём:</b> ~10 КБ · <b>Цена:</b> $0</div>
+        </div>
+        <div class="layer-install">
+          <div class="label">Установка</div>
+          <div class="builtin">Встроено в Claude Code<br/><span style="font-size:11px;">ничего ставить не нужно</span></div>
+        </div>
+      </div>
+
+      <!-- LAYER 2 -->
+      <div class="layer">
+        <div class="layer-num"><span class="big">02</span>OPEN-SOURCE</div>
+        <div class="layer-body">
+          <h3>Per-project memory <span class="badge-new">tree</span></h3>
+          <div class="role">// Знания конкретного проекта: пути, команды, рецепты</div>
+          <p>
+            Дыра между auto-memory (общая) и vault (документация). Где лежат файлы конкретного проекта, какие команды работают, что уже пробовал. <strong>Tree-архитектура</strong> с cwd-aware routing: открыл проект — Claude автоматически подгрузил его ветвь, открыл другой — переключился.
+          </p>
+          <p>
+            Two-tier: active (последние 7 дней) грузится в системный промпт целиком, cold — по явному <code>/tree-recall</code>. Ставится один раз на машину, дальше — <code>/tree-write</code> в каждом проекте.
+          </p>
+          <div class="tech"><b>Эффект:</b> 80–120 КБ системного промпта → 8–14 КБ · <b>Цена:</b> $0 (open-source)</div>
+        </div>
+        <div class="layer-install">
+          <div class="label">Установить</div>
+          <a href="https://sergeyramas.github.io/ramas-karpathy-tree/" target="_blank">
+            <span>ramas-karpathy-tree</span>
+            <span class="arrow">↗</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- LAYER 3 -->
+      <div class="layer">
+        <div class="layer-num"><span class="big">03</span>OPEN-SOURCE</div>
+        <div class="layer-body">
+          <h3>Wiki vault <span class="badge-new">obsidian</span></h3>
+          <div class="role">// Distilled знания: проекты, entities, services, концепты</div>
+          <p>
+            Полноценная wiki в Obsidian — distillation сырья в связную базу знаний по паттерну Karpathy LLM Wiki. Каждая страница имеет frontmatter, wikilinks, теги. Внутри — карточки людей, инструментов, проектов, услуг, синтез прошлых сессий.
+          </p>
+          <p>
+            Доступ через 14 wiki-skills: <code>wiki-query</code> (Q&A с цитатами), <code>wiki-ingest</code> (источник → distilled страница), <code>wiki-lint</code> (audit), <code>cross-linker</code> (поиск битых связей). Всё локально, всё под твоим контролем.
+          </p>
+          <div class="tech"><b>Структура:</b> entities · concepts · projects · sources · synthesis · howto · journal · ideas</div>
+        </div>
+        <div class="layer-install">
+          <div class="label">Установить</div>
+          <a href="https://github.com/sergeyramas/karpathy-wiki-bundle" target="_blank">
+            <span>karpathy-wiki-bundle</span>
+            <span class="arrow">↗</span>
+          </a>
+          <div class="label" style="margin-top:6px;">или альтернатива</div>
+          <a href="https://sergeyramas.github.io/karpathy-memory/" target="_blank">
+            <span>karpathy-memory</span>
+            <span class="arrow">↗</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- LAYER 4 -->
+      <div class="layer">
+        <div class="layer-num"><span class="big">04</span>OPEN-SOURCE</div>
+        <div class="layer-body">
+          <h3>Daily logs <span class="badge-new">compiler</span></h3>
+          <div class="role">// Хронология по дням, индекс прошлых сессий</div>
+          <p>
+            Memory compiler пишет короткую запись по каждому дню работы: что делал, какие проекты трогал, что решил. Полезно когда вспоминаешь &laquo;что я делал в прошлый вторник?&raquo; или &laquo;где обсуждали тот вопрос?&raquo;.
+          </p>
+          <p>
+            Работает через <code>SessionStart</code> + <code>SessionEnd</code> хуки Claude Code. Сохраняет state перед компактификацией контекста. Индекс в <code>~/.claude-memory-compiler/knowledge/index.md</code>.
+          </p>
+          <div class="tech"><b>Часть:</b> karpathy-wiki-bundle (memory-compiler hooks) · <b>Цена:</b> $0</div>
+        </div>
+        <div class="layer-install">
+          <div class="label">Установить (входит в bundle)</div>
+          <a href="https://github.com/sergeyramas/karpathy-wiki-bundle" target="_blank">
+            <span>karpathy-wiki-bundle</span>
+            <span class="arrow">↗</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- LAYER 5 -->
+      <div class="layer">
+        <div class="layer-num"><span class="big">05</span>OPEN-SOURCE</div>
+        <div class="layer-body">
+          <h3>Skills <span class="badge-new">поведения</span></h3>
+          <div class="role">// Программы агента: как делать X, когда срабатывать</div>
+          <p>
+            Каждый skill — папка с <code>SKILL.md</code> и опциональными скриптами. Описывает Claude: <em>когда триггериться</em> (по фразам пользователя) и <em>что делать</em> (инструкции + код). Auto-discovery — кладёшь в <code>~/.claude/skills/</code>, рестартишь Claude, готово.
+          </p>
+          <p>
+            В моей машине 38 skills: дизайн (taste-skill, brutalist), wiki (wiki-query, wiki-ingest), деплой (ship-to-vercel), eBay-автоматизация, видео-туториалы. Полный каталог с README — в bundle.
+          </p>
+          <div class="tech"><b>Где:</b> <code>~/.claude/skills/</code> · <b>Auto-discovery:</b> да · <b>Цена:</b> $0</div>
+        </div>
+        <div class="layer-install">
+          <div class="label">38 готовых skills в bundle</div>
+          <a href="https://github.com/sergeyramas/karpathy-wiki-bundle" target="_blank">
+            <span>karpathy-wiki-bundle</span>
+            <span class="arrow">↗</span>
+          </a>
+          <div class="label" style="margin-top:6px;">+ skill этого лендинга</div>
+          <a href="https://github.com/PleasePrompto/notebooklm-skill" target="_blank">
+            <span>notebooklm-skill</span>
+            <span class="arrow">↗</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- LAYER 6 -->
+      <div class="layer">
+        <div class="layer-num new"><span class="big">06</span>★ NEW</div>
+        <div class="layer-body">
+          <h3>NotebookLM <span class="badge-new">research</span></h3>
+          <div class="role">// Raw источники: PDF, видео, аудио, статьи — с цитатами</div>
+          <p>
+            То, чего не хватало остальным 5 слоям. <strong>Сырьё</strong> — оригинальные документы, видео-обзоры, исследования. Хранится у Google в твоём NotebookLM (бесплатно, 1M токенов на ноутбук). Skill превращает каждый ноутбук в API для Claude.
+          </p>
+          <p>
+            Ответы <strong>source-grounded</strong> — каждый факт идёт с цитатой на конкретный исходный документ. Cross-notebook синтез (которого сам NotebookLM не умеет) делает Claude поверх. Полный экспорт в файлы — на случай если хочется вытащить всё из Google.
+          </p>
+          <div class="tech"><b>Хранилище:</b> Google NotebookLM · <b>Channel:</b> open-source skill · <b>Цена:</b> $0</div>
+        </div>
+        <div class="layer-install">
+          <div class="label">Установить (10 минут)</div>
+          <a href="#install">
+            <span>Гайд внизу страницы</span>
+            <span class="arrow">↓</span>
+          </a>
+          <div class="label" style="margin-top:6px;">или сразу с GitHub</div>
+          <a href="https://github.com/PleasePrompto/notebooklm-skill" target="_blank">
+            <span>notebooklm-skill</span>
+            <span class="arrow">↗</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="margin-top: 56px; padding: 32px; background: var(--bg-elev); border: 1px solid var(--border); border-radius: 12px;">
+      <h3 style="font-size: 19px; margin-bottom: 12px; letter-spacing: -0.01em;">💡 Полная сборка одной командой</h3>
+      <p style="color: var(--text-dim); font-size: 15px; margin-bottom: 18px;">
+        Слои 3-5 ставятся вместе через <code>karpathy-wiki-bundle</code> (one-liner installer + 14 skills + memory-compiler hooks). Слой 2 — <code>ramas-karpathy-tree</code>. Слой 6 — <code>notebooklm-skill</code>. Auto-memory уже встроена. Итого: 3 install-шага, остальные 3 слоя — встроены или поставятся вместе с bundle.
+      </p>
+      <a href="https://ramas-two.vercel.app" class="btn btn-ghost" target="_blank">
+        Все решения на ramas hub <span style="color: var(--accent); margin-left: 6px;">↗</span>
+      </a>
     </div>
   </div>
 </section>
@@ -631,6 +887,7 @@
   <div class="container row">
     <div>© 2026 sergeyramas. Открытый источник: skill PleasePrompto/notebooklm-skill (MIT).</div>
     <div>
+      <a href="https://ramas-two.vercel.app" target="_blank">ramas hub</a>
       <a href="https://github.com/PleasePrompto/notebooklm-skill" target="_blank">Skill</a>
       <a href="https://notebooklm.google.com" target="_blank">NotebookLM</a>
       <a href="https://youtu.be/PkOlfB3RY5Q" target="_blank">Видео-источник</a>
